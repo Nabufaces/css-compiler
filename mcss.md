@@ -6,7 +6,7 @@
     * ?=只在变量未赋值或null时生效,所有的值类型都可以被赋值,包括函数
     * ^=表示将赋值操作提升到全局作用域
 
-```mcss
+```
     // $variable has scope
     $a = 10px;
     $a ?= 20px;
@@ -32,6 +32,29 @@
 #### %符
 * % 代表除最外层选择器之外的选择器序列，如：
 
+```
+    .ms-form
+        input[type="range"],
+        select{
+          display: inline-block;
+          .ms-form-stack %{
+            display: block;
+          }
+        }
+        // other ruleset
+    }
+```
+
+编译后的css:
+
+```css
+    .ms-form input[type="range"],.ms-form select{
+        display:inline-block;
+    }
+    .ms-form-stack  input[type="range"],.ms-form-stack  select{
+        display:block;
+    }
+```
 
 #### 函数
 
@@ -39,7 +62,7 @@
 当function没有返回值时，函数成为一个mixin, 会将解释后的 function block输出，实现SCSS中的@include, 这也是最常用的方式
 
 
-```mcss
+```
     // 带参数
     $size = ($width, $height){
         $height ?= $width;
@@ -87,7 +110,7 @@
 的内建函数是一致的，优势是不需要树节点操作 。
 
 
-```mcss
+```
     $abs = ($value){
         @if $value < 0 {
             @return -$value; }
@@ -109,7 +132,7 @@
 mcss支持类似 stylus 的transparent call (只适用于作为mixin使用的function)的调用方式
 
 
-```mcss
+```
     $border-radius = ($args...){
         @if !len($args) { 
             error('$border-radius Requires at least one paramete')}
@@ -139,7 +162,7 @@ mcss支持类似 stylus 的transparent call (只适用于作为mixin使用的fun
 
 ##### 4. 参数
 mcss支持丰富的参数类型: rest param 以及 default param 、named param;
-```mcss
+```
     // 缺省值
     $default-param = ($left, $right = 30px ){
         default-param: $right;
@@ -182,3 +205,29 @@ mcss支持丰富的参数类型: rest param 以及 default param 、named param;
 
 * 注意rest param 不能有默认值, 在参数有named param时 这个参数会被从参数列表中剔除，剩余的参数再进行赋值
 
+
+##### 5. $arguments以及其他
+在进入function block时, mcss会在当前作用域定义一个变量叫$arguments(Type: valueslist), 代表传入的所有参数
+
+mcss不支持类似arguments[0]下标操作, 不过你可以通过内建函数 args(0)来得到同样的效果
+
+```
+    $foo = {
+      first: args(0);
+      seconed: args(1);
+      arguments: $arguments
+    }
+    body{
+        $foo: 10px, 20px
+    } 
+```
+
+编译后的css:
+
+```css
+    body{
+      first:10px;
+      seconed:20px;
+      arguments:10px,20px;
+    }
+```
